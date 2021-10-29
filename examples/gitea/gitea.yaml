@@ -1,0 +1,12 @@
+apiVersion: gpte.opentlc.com/v1
+kind: Gitea
+metadata:
+  name: gitea
+spec:
+  giteaImageTag: latest
+  giteaVolumeSize: 1Gi
+  giteaVolumeStorageClass: gp2
+  postgresqlVolumeSize: 1Gi
+  postgresqlVolumeStorageClass: gp2
+  giteaAdminUser: opentlc-mgr
+  giteaAdminPassword: r3dh4t1!

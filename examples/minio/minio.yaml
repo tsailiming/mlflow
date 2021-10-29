@@ -1,0 +1,86 @@
+---
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  name: minio
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: console-secret
+  namespace: minio  
+type: Opaque
+data:
+  CONSOLE_ACCESS_KEY: Y29uc29sZWFjY2Vzc2tleQ== #consoleacccesskey
+  CONSOLE_PBKDF_PASSPHRASE: a2g4TEQzQndjdWp5N3Ricw== #kh8LD3Bwcujy7tbs
+  CONSOLE_PBKDF_SALT: dWcyQUZ4WHE1YXVXUkpaNA== #ug2AFxXq5auWRJZ4
+  CONSOLE_SECRET_KEY: Y29uc29sZXNlY3JldGtleQ== #consolesecretkey
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-creds-secret
+  namespace: minio  
+type: Opaque
+data:
+  accesskey: YWNjZXNza2V5 #accesskey
+  secretkey: c2VjcmV0a2V5 #secretkey
+---
+apiVersion: minio.min.io/v2
+kind: Tenant
+metadata:
+  name: minio
+  namespace: minio
+spec:
+  console:
+    consoleSecret:
+      name: console-secret
+    replicas: 2
+  credsSecret:
+    name: minio-creds-secret
+  pools:
+  - servers: 2
+    volumeClaimTemplate:
+      metadata:
+        name: data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: gp2
+    volumesPerServer: 4
+  requestAutoCert: false
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: minio-console
+  namespace: minio
+spec:
+  to:
+    kind: Service
+    name: minio-console
+    weight: 100
+  port:
+    targetPort: http-console
+  tls:
+    termination: edge
+  wildcardPolicy: None
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: s3
+  namespace: minio
+spec:
+  to:
+    kind: Service
+    name: minio
+    weight: 100
+  port:
+    targetPort: http-minio
+  tls:
+    termination: edge
+  wildcardPolicy: None

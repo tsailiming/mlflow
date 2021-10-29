@@ -1,0 +1,139 @@
+---
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  name: mlflow
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: db
+  namespace: mlflow
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+  storageClassName: gp2
+  volumeMode: Filesystem
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: nginx-htpasswd
+  namespace: mlflow
+type: Opaque
+data:
+  #mlflow/czZ7BmL7eKqsTcCm
+  .htpasswd: bWxmbG93OiRhcHIxJHQ1VHFLMEYwJE96eVprRFlHZTBqU2tKNjZ0VVAxei4=
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mlflow
+  name: mlflow
+  namespace: mlflow    
+spec:
+  ports:
+  - name: 8080-tcp
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: 8088-tcp
+    protocol: TCP
+    port: 8088
+    targetPort: 8088
+  selector:
+    app: mlflow
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mlflow
+  name: mlflow
+  namespace: mlflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow
+  template:
+    metadata:
+      labels:
+        app: mlflow
+    spec:
+      containers:
+      - name: ngix
+        image: quay.io/ltsai/nginx-mlflow-118:latest
+        ports:
+          - containerPort: 8088
+            protocol: TCP
+        resources: {}
+        volumeMounts:
+          - name: nginx-htpasswd
+            readOnly: true
+            mountPath: /opt/app-root/src
+      - envFrom:
+        - configMapRef:
+            name: mlflow-config
+        - secretRef:
+            name: minio-secrets
+        image: quay.io/ltsai/mlflow:1.8.0
+        imagePullPolicy: IfNotPresent
+        name: mlflow
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        volumeMounts:
+          - name: db
+            mountPath: /db
+      volumes:
+        - name: db
+          persistentVolumeClaim:
+            claimName: db
+        - name: nginx-htpasswd
+          secret:
+            secretName: nginx-htpasswd
+            defaultMode: 420
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: mlflow
+  name: mlflow
+  namespace: mlflow
+spec:
+  port:
+    targetPort: 8088-tcp
+  to:
+    kind: Service
+    name: mlflow
+    weight: 100
+  tls:
+    termination: edge     
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mlflow-config
+  namespace: mlflow
+data:
+  DEFAULT_ARTIFACT_ROOT: s3://mlflow
+  MLFLOW_S3_ENDPOINT_URL: http://minio.minio.svc.cluster.local:80
+  BACKEND_STORE_URI: sqlite:////db/mlflow.db
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-secrets
+  namespace: mlflow  
+type: Opaque
+data:
+  AWS_ACCESS_KEY_ID: bWxmbG93 #mlflow
+  AWS_SECRET_ACCESS_KEY: dFQ4RnFUVlQzRVA4Rm1ndg== #tT8FqTVT3EP8Fmgv
