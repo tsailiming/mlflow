@@ -53,3 +53,35 @@ The python dependencies can be installed using `pip`.
 ----
 pip install -r samples/requirements.txt
 ----
+
+== Changing default passwords
+
+The following default passwords can be changed by updating the following files:
+
+* `minio/minio.yaml`
+
+Details of the credentials can be found https://github.com/minio/operator/blob/master/docs/crd.adoc[here].
+[cols="1,1"]
+|===
+|`minio-creds-secret`
+|Specifcy a Kubernetes opaque secret for the console
+
+|`console-secret`
+|Specify a Kubernetes opaque secret to use for setting the MinIO root access key and secret key.
+|===
+
+
+* `mlflow/mlfow.yaml`
+
+[cols="1,1"]
+|===
+|`nginx-htpasswd`
+|Nginx basic authentication username and password. Use htpasswd and base64 to encode the file. 
+
+|`minio-secret`
+|This is the credential for the mlflow s3 bucket
+|===
+
+* `samples/wine-quality.sh`
+
+Update the file with correct credentials.
