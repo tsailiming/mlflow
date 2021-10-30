@@ -19,11 +19,9 @@ The console and S3 routes will be created. Default user credentials can be found
 $ oc create -f minio/minio.yaml
 ----
 
-Using the minio console, create a `mlflow` bucket with a default user account with the following access and secret key: `mlflow/tT8FqTVT3EP8Fmgv`. 
+Using the minio console, create a `mlflow` bucket with a user account.
 
-Lastly, assign the user with the `readwrite` policy.
-
-It shoud look like this:
+The user account should have the default access and secret key(`mlflow/tT8FqTVT3EP8Fmgv`) and assigned with the `readwrite` policy.
 
 image:images/minio-user.png[]
 
