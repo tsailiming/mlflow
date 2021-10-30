@@ -8,7 +8,7 @@ This requires Minio running to serve as a S3 backend for MLflow.
 
 Install the Minio Operator from OpenShift Operator Hub. This will install the operator into the `openshift-operators` namespace. 
 
-image:image/minio-operator.png
+image::images/minio-operator.png
 
 Once the Operator is installed, create a Minio `Tenant`. This will create minio in the `minio` namespace.
 
@@ -24,7 +24,7 @@ Using the minio console, create a `mlflow` bucket with a default user account wi
 Lastly, assign the user with the `readwrite` policy.
 
 It shoud look like this:
-image:images/minio-user.png [width=128,height=128]
+image::images/minio-user.png [width=128,height=128]
 
 == Deploying MLflow
 
