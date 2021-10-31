@@ -22,6 +22,10 @@ Finally, push to my registry
 # podman push registry.lab.ltsai.com/mlflow:1.8.0
 ```
 
+Examples
+===
+There are sample deployment code in the `/examples` directory for OpenShift. 
+
 Notes
 ===
 If you are using Nexus (I am on OSS 3.23.0-03), it is [not OCI compliant](https://issues.sonatype.org/browse/NEXUS-16947). When OpensShift pulls the image, it will error out with `unsupported docker v2s2 media type`.
