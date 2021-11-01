@@ -83,7 +83,7 @@ spec:
             name: mlflow-config
         - secretRef:
             name: minio-secrets
-        image: quay.io/ltsai/mlflow:1.8.0
+        image: quay.io/ltsai/mlflow:1.21.0
         imagePullPolicy: IfNotPresent
         name: mlflow
         ports:
